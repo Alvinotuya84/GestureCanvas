@@ -55,7 +55,8 @@ public:
               uint8_t resultR = static_cast<uint8_t>(existingR * (1.0 - blendFactor) + newR * blendFactor);
               uint8_t resultG = static_cast<uint8_t>(existingG * (1.0 - blendFactor) + newG * blendFactor);
               uint8_t resultB = static_cast<uint8_t>(existingB * (1.0 - blendFactor) + newB * blendFactor);
-              uint8_t resultA = static_cast<uint8_t>(std::min(255.0, existingA + newA));
+              uint8_t resultA = static_cast<uint8_t>(std::min(255.0, static_cast<double>(existingA + newA)));
+
               
               pixelData_[index] = (resultA << 24) | (resultR << 16) | (resultG << 8) | resultB;
             }

@@ -5,13 +5,11 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "Canvas.h"
+#include "BrushEngine.h"
+#include "Stroke.h"
 
 namespace facebook::react {
-
-// Forward declarations
-class Canvas;
-class BrushEngine;
-class Stroke;
 
 class NativeGestureCanvas : public NativeGestureCanvasCxxSpec<NativeGestureCanvas> {
 public:

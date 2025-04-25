@@ -1,6 +1,9 @@
 {
   "files.associations": {
     "*.embeddedhtml": "html",
-    "unordered_map": "cpp"
+    "unordered_map": "cpp",
+    "ios": "cpp",
+    "algorithm": "cpp",
+    "vector": "cpp"
   }
 }

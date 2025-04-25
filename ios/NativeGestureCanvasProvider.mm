@@ -1,3 +1,4 @@
+// NativeGestureCanvasProvider.mm
 #import "NativeGestureCanvasProvider.h"
 #import <ReactCommon/CallInvoker.h>
 #import <ReactCommon/TurboModule.h>
@@ -8,7 +9,9 @@
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
     (const facebook::react::ObjCTurboModule::InitParams &)params
 {
-  return std::make_shared<facebook::react::NativeGestureCanvas>(params.jsInvoker);
+  return std::static_pointer_cast<facebook::react::TurboModule>(
+    std::make_shared<facebook::react::NativeGestureCanvas>(params.jsInvoker)
+  );
 }
 
 @end

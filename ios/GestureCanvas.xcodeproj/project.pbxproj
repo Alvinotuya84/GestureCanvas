@@ -14,8 +14,12 @@
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		CEB9D1522DBB60FB008FCB37 /* NativeSampleModuleProvider.mm in Sources */ = {isa = PBXBuildFile; fileRef = CEB9D1512DBB60FB008FCB37 /* NativeSampleModuleProvider.mm */; };
 		CEB9D1592DBB6EAB008FCB37 /* NativeGestureCanvasProvider.mm in Sources */ = {isa = PBXBuildFile; fileRef = CEB9D1582DBB6EAB008FCB37 /* NativeGestureCanvasProvider.mm */; };
-		CEB9D15F2DBB6FC7008FCB37 /* NativeGestureCanvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB9D15B2DBB6FC7008FCB37 /* NativeGestureCanvas.cpp */; };
-		CEB9D1602DBB6FC7008FCB37 /* NativeSampleModule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB9D15D2DBB6FC7008FCB37 /* NativeSampleModule.cpp */; };
+		CEB9D1632DBB7147008FCB37 /* CanvasNativeView.mm in Sources */ = {isa = PBXBuildFile; fileRef = CEB9D1622DBB713E008FCB37 /* CanvasNativeView.mm */; };
+		CEB9D18B2DBBA79B008FCB37 /* Stroke.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB9D1892DBBA79B008FCB37 /* Stroke.cpp */; };
+		CEB9D18C2DBBA79B008FCB37 /* NativeGestureCanvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB9D1852DBBA79B008FCB37 /* NativeGestureCanvas.cpp */; };
+		CEB9D18D2DBBA79B008FCB37 /* Canvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB9D1832DBBA79B008FCB37 /* Canvas.cpp */; };
+		CEB9D18E2DBBA79B008FCB37 /* NativeSampleModule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB9D1872DBBA79B008FCB37 /* NativeSampleModule.cpp */; };
+		CEB9D18F2DBBA79B008FCB37 /* BrushEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CEB9D1812DBBA79B008FCB37 /* BrushEngine.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,10 +36,18 @@
 		CEB9D1512DBB60FB008FCB37 /* NativeSampleModuleProvider.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NativeSampleModuleProvider.mm; sourceTree = "<group>"; };
 		CEB9D1572DBB6EAB008FCB37 /* NativeGestureCanvasProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeGestureCanvasProvider.h; sourceTree = "<group>"; };
 		CEB9D1582DBB6EAB008FCB37 /* NativeGestureCanvasProvider.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = NativeGestureCanvasProvider.mm; sourceTree = "<group>"; };
-		CEB9D15A2DBB6FC7008FCB37 /* NativeGestureCanvas.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeGestureCanvas.h; sourceTree = "<group>"; };
-		CEB9D15B2DBB6FC7008FCB37 /* NativeGestureCanvas.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NativeGestureCanvas.cpp; sourceTree = "<group>"; };
-		CEB9D15C2DBB6FC7008FCB37 /* NativeSampleModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeSampleModule.h; sourceTree = "<group>"; };
-		CEB9D15D2DBB6FC7008FCB37 /* NativeSampleModule.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NativeSampleModule.cpp; sourceTree = "<group>"; };
+		CEB9D1612DBB711F008FCB37 /* CanvasNativeView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CanvasNativeView.h; sourceTree = "<group>"; };
+		CEB9D1622DBB713E008FCB37 /* CanvasNativeView.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CanvasNativeView.mm; sourceTree = "<group>"; };
+		CEB9D1802DBBA79B008FCB37 /* BrushEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BrushEngine.h; sourceTree = "<group>"; };
+		CEB9D1812DBBA79B008FCB37 /* BrushEngine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BrushEngine.cpp; sourceTree = "<group>"; };
+		CEB9D1822DBBA79B008FCB37 /* Canvas.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Canvas.h; sourceTree = "<group>"; };
+		CEB9D1832DBBA79B008FCB37 /* Canvas.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Canvas.cpp; sourceTree = "<group>"; };
+		CEB9D1842DBBA79B008FCB37 /* NativeGestureCanvas.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeGestureCanvas.h; sourceTree = "<group>"; };
+		CEB9D1852DBBA79B008FCB37 /* NativeGestureCanvas.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NativeGestureCanvas.cpp; sourceTree = "<group>"; };
+		CEB9D1862DBBA79B008FCB37 /* NativeSampleModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NativeSampleModule.h; sourceTree = "<group>"; };
+		CEB9D1872DBBA79B008FCB37 /* NativeSampleModule.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = NativeSampleModule.cpp; sourceTree = "<group>"; };
+		CEB9D1882DBBA79B008FCB37 /* Stroke.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Stroke.h; sourceTree = "<group>"; };
+		CEB9D1892DBBA79B008FCB37 /* Stroke.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Stroke.cpp; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -82,7 +94,9 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				CEB9D15E2DBB6FC7008FCB37 /* shared */,
+				CEB9D18A2DBBA79B008FCB37 /* shared */,
+				CEB9D1622DBB713E008FCB37 /* CanvasNativeView.mm */,
+				CEB9D1612DBB711F008FCB37 /* CanvasNativeView.h */,
 				CEB9D1572DBB6EAB008FCB37 /* NativeGestureCanvasProvider.h */,
 				CEB9D1582DBB6EAB008FCB37 /* NativeGestureCanvasProvider.mm */,
 				CEB9D1502DBB60FB008FCB37 /* NativeSampleModuleProvider.h */,
@@ -115,13 +129,19 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
-		CEB9D15E2DBB6FC7008FCB37 /* shared */ = {
+		CEB9D18A2DBBA79B008FCB37 /* shared */ = {
 			isa = PBXGroup;
 			children = (
-				CEB9D15A2DBB6FC7008FCB37 /* NativeGestureCanvas.h */,
-				CEB9D15B2DBB6FC7008FCB37 /* NativeGestureCanvas.cpp */,
-				CEB9D15C2DBB6FC7008FCB37 /* NativeSampleModule.h */,
-				CEB9D15D2DBB6FC7008FCB37 /* NativeSampleModule.cpp */,
+				CEB9D1802DBBA79B008FCB37 /* BrushEngine.h */,
+				CEB9D1812DBBA79B008FCB37 /* BrushEngine.cpp */,
+				CEB9D1822DBBA79B008FCB37 /* Canvas.h */,
+				CEB9D1832DBBA79B008FCB37 /* Canvas.cpp */,
+				CEB9D1842DBBA79B008FCB37 /* NativeGestureCanvas.h */,
+				CEB9D1852DBBA79B008FCB37 /* NativeGestureCanvas.cpp */,
+				CEB9D1862DBBA79B008FCB37 /* NativeSampleModule.h */,
+				CEB9D1872DBBA79B008FCB37 /* NativeSampleModule.cpp */,
+				CEB9D1882DBBA79B008FCB37 /* Stroke.h */,
+				CEB9D1892DBBA79B008FCB37 /* Stroke.cpp */,
 			);
 			path = shared;
 			sourceTree = "<group>";
@@ -219,13 +239,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-GestureCanvas/Pods-GestureCanvas-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-GestureCanvas/Pods-GestureCanvas-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -262,13 +278,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-GestureCanvas/Pods-GestureCanvas-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-GestureCanvas/Pods-GestureCanvas-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -282,10 +294,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CEB9D15F2DBB6FC7008FCB37 /* NativeGestureCanvas.cpp in Sources */,
-				CEB9D1602DBB6FC7008FCB37 /* NativeSampleModule.cpp in Sources */,
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
+				CEB9D18B2DBBA79B008FCB37 /* Stroke.cpp in Sources */,
+				CEB9D18C2DBBA79B008FCB37 /* NativeGestureCanvas.cpp in Sources */,
+				CEB9D18D2DBBA79B008FCB37 /* Canvas.cpp in Sources */,
+				CEB9D18E2DBBA79B008FCB37 /* NativeSampleModule.cpp in Sources */,
+				CEB9D18F2DBBA79B008FCB37 /* BrushEngine.cpp in Sources */,
 				CEB9D1592DBB6EAB008FCB37 /* NativeGestureCanvasProvider.mm in Sources */,
+				CEB9D1632DBB7147008FCB37 /* CanvasNativeView.mm in Sources */,
 				CEB9D1522DBB60FB008FCB37 /* NativeSampleModuleProvider.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -416,7 +432,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -485,7 +504,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
