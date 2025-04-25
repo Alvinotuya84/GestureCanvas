@@ -29,6 +29,7 @@ const BRUSH_TEXTURES = [
   {name: 'Normal', value: 'normal'},
   {name: 'Chalk', value: 'chalk'},
   {name: 'Watercolor', value: 'watercolor'},
+  {name: 'Eraser', value: 'eraser'}, // Added eraser as a texture type
 ];
 const COLORS = [
   '#000000',
@@ -60,6 +61,8 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
   const clearButtonScale = useSharedValue(1);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDocked, setIsDocked] = useState(true);
+  const [previousBrushStyle, setPreviousBrushStyle] =
+    useState<BrushStyle | null>(null);
 
   const toggleToolbar = () => {
     setIsExpanded(!isExpanded);
@@ -135,11 +138,50 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
   };
 
   const handleTextureChange = (texture: string) => {
-    onBrushChange({...brushStyle, texture});
+    if (texture === 'eraser') {
+      // If switching to eraser, save current brush style and set eraser properties
+      if (brushStyle.texture !== 'eraser') {
+        setPreviousBrushStyle({...brushStyle});
+        // For eraser, we set color to match the background, increase size, and use normal texture rendering
+        onBrushChange({
+          ...brushStyle,
+          texture: 'eraser',
+          color: '#FFFFFF', // Match the canvas background color
+          opacity: 1.0, // Full opacity for the eraser
+        });
+      }
+    } else if (brushStyle.texture === 'eraser' && previousBrushStyle) {
+      // If switching from eraser to another texture, restore previous settings but with the new texture
+      onBrushChange({
+        ...previousBrushStyle,
+        texture: texture,
+      });
+    } else {
+      // Normal texture change
+      onBrushChange({...brushStyle, texture});
+    }
   };
 
   const handleColorChange = (color: string) => {
-    onBrushChange({...brushStyle, color});
+    // If we're in eraser mode, switch back to normal mode with the selected color
+    if (brushStyle.texture === 'eraser') {
+      if (previousBrushStyle) {
+        onBrushChange({
+          ...previousBrushStyle,
+          color: color,
+          texture: 'normal', // Switch back to normal texture
+        });
+      } else {
+        onBrushChange({
+          ...brushStyle,
+          color: color,
+          texture: 'normal', // Switch back to normal texture
+        });
+      }
+    } else {
+      // Normal color change
+      onBrushChange({...brushStyle, color});
+    }
   };
 
   const handleClear = () => {
@@ -167,8 +209,37 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
   };
 
   const adjustOpacity = (amount: number) => {
+    // Don't adjust opacity for eraser
+    if (brushStyle.texture === 'eraser') return;
+
     const newValue = Math.max(0.1, Math.min(1.0, brushStyle.opacity + amount));
     onBrushChange({...brushStyle, opacity: newValue});
+  };
+
+  // Quick access eraser toggle button
+  const toggleEraser = () => {
+    if (brushStyle.texture === 'eraser') {
+      // Switch back to previous brush
+      if (previousBrushStyle) {
+        onBrushChange(previousBrushStyle);
+      } else {
+        // Default to normal brush if no previous style saved
+        onBrushChange({
+          ...brushStyle,
+          texture: 'normal',
+          color: '#000000',
+        });
+      }
+    } else {
+      // Switch to eraser
+      setPreviousBrushStyle({...brushStyle});
+      onBrushChange({
+        ...brushStyle,
+        texture: 'eraser',
+        color: '#FFFFFF',
+        opacity: 1.0,
+      });
+    }
   };
 
   return (
@@ -181,6 +252,15 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
               size={24}
               color="white"
             />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.eraserButton,
+              brushStyle.texture === 'eraser' && styles.eraserButtonActive,
+            ]}
+            onPress={toggleEraser}>
+            <Icon name="eraser" size={20} color="white" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.dockButton} onPress={toggleDock}>
@@ -212,7 +292,12 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
                     <View
                       style={[
                         styles.sizePreview,
-                        {width: size / 2, height: size / 2},
+                        {
+                          width: size / 2,
+                          height: size / 2,
+                          backgroundColor:
+                            brushStyle.texture === 'eraser' ? '#333' : 'white',
+                        },
                       ]}
                     />
                   </TouchableOpacity>
@@ -238,6 +323,8 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
                           ? 'brush'
                           : texture.value === 'chalk'
                           ? 'format-paint'
+                          : texture.value === 'eraser'
+                          ? 'eraser'
                           : 'water'
                       }
                       size={18}
@@ -249,7 +336,11 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
               </View>
             </View>
 
-            <View style={styles.section}>
+            <View
+              style={[
+                styles.section,
+                brushStyle.texture === 'eraser' && styles.disabledSection,
+              ]}>
               <Text style={styles.sectionTitle}>Color</Text>
               <View style={styles.colorContainer}>
                 {COLORS.map(color => (
@@ -261,12 +352,17 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
                       brushStyle.color === color && styles.selectedColorButton,
                     ]}
                     onPress={() => handleColorChange(color)}
+                    disabled={brushStyle.texture === 'eraser'}
                   />
                 ))}
               </View>
             </View>
 
-            <View style={styles.section}>
+            <View
+              style={[
+                styles.section,
+                brushStyle.texture === 'eraser' && styles.disabledSection,
+              ]}>
               <Text style={styles.sectionTitle}>Physics</Text>
               <View style={styles.physicsContainer}>
                 <View style={styles.physicsControl}>
@@ -274,7 +370,8 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
                   <View style={styles.controlButtons}>
                     <TouchableOpacity
                       style={styles.controlButton}
-                      onPress={() => adjustBrushFluidResponse(-0.1)}>
+                      onPress={() => adjustBrushFluidResponse(-0.1)}
+                      disabled={brushStyle.texture === 'eraser'}>
                       <Text style={styles.controlText}>-</Text>
                     </TouchableOpacity>
                     <Text style={styles.valueText}>
@@ -282,7 +379,8 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
                     </Text>
                     <TouchableOpacity
                       style={styles.controlButton}
-                      onPress={() => adjustBrushFluidResponse(0.1)}>
+                      onPress={() => adjustBrushFluidResponse(0.1)}
+                      disabled={brushStyle.texture === 'eraser'}>
                       <Text style={styles.controlText}>+</Text>
                     </TouchableOpacity>
                   </View>
@@ -293,7 +391,8 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
                   <View style={styles.controlButtons}>
                     <TouchableOpacity
                       style={styles.controlButton}
-                      onPress={() => adjustBrushDampening(-0.05)}>
+                      onPress={() => adjustBrushDampening(-0.05)}
+                      disabled={brushStyle.texture === 'eraser'}>
                       <Text style={styles.controlText}>-</Text>
                     </TouchableOpacity>
                     <Text style={styles.valueText}>
@@ -301,7 +400,8 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
                     </Text>
                     <TouchableOpacity
                       style={styles.controlButton}
-                      onPress={() => adjustBrushDampening(0.05)}>
+                      onPress={() => adjustBrushDampening(0.05)}
+                      disabled={brushStyle.texture === 'eraser'}>
                       <Text style={styles.controlText}>+</Text>
                     </TouchableOpacity>
                   </View>
@@ -312,7 +412,8 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
                   <View style={styles.controlButtons}>
                     <TouchableOpacity
                       style={styles.controlButton}
-                      onPress={() => adjustOpacity(-0.1)}>
+                      onPress={() => adjustOpacity(-0.1)}
+                      disabled={brushStyle.texture === 'eraser'}>
                       <Text style={styles.controlText}>-</Text>
                     </TouchableOpacity>
                     <Text style={styles.valueText}>
@@ -320,7 +421,8 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
                     </Text>
                     <TouchableOpacity
                       style={styles.controlButton}
-                      onPress={() => adjustOpacity(0.1)}>
+                      onPress={() => adjustOpacity(0.1)}
+                      disabled={brushStyle.texture === 'eraser'}>
                       <Text style={styles.controlText}>+</Text>
                     </TouchableOpacity>
                   </View>
@@ -363,6 +465,14 @@ const styles = StyleSheet.create({
   dockButton: {
     padding: 8,
   },
+  eraserButton: {
+    padding: 8,
+    backgroundColor: '#333',
+    borderRadius: 5,
+  },
+  eraserButtonActive: {
+    backgroundColor: '#2196F3',
+  },
   clearButton: {
     backgroundColor: '#F44336',
     paddingHorizontal: 15,
@@ -379,6 +489,9 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 18, // Increased from 12 to 18 for better spacing
+  },
+  disabledSection: {
+    opacity: 0.5,
   },
   sectionTitle: {
     color: 'white',
@@ -476,7 +589,7 @@ const styles = StyleSheet.create({
   },
   valueText: {
     color: 'white',
-    width: 40, // Increased from 36 to 40
+    width: 40,
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
   },
