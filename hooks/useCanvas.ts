@@ -71,13 +71,18 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
 
   const handleStartDrawing = useCallback(
     (point: Point) => {
-      if (canvasState.canvasId === null) return;
+      if (canvasState.canvasId === null) {
+        console.log('Canvas ID is null!');
+        return;
+      }
 
+      console.log('Beginning stroke with point:', point);
       const strokeId = NativeGestureCanvas.beginStroke(
         canvasState.canvasId,
         point,
         brushStyle,
       );
+      console.log('Stroke ID returned:', strokeId);
 
       setCanvasState(prev => ({...prev, strokeId}));
       setIsDrawing(true);
