@@ -1,97 +1,166 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# GestureCanvas
 
-# Getting Started
+GestureCanvas is a high-performance drawing application built with React Native that leverages C++ Turbo Modules for efficient brush physics and rendering. This app demonstrates how to use React Native's new architecture to offload computationally intensive tasks to native code.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Features
 
-## Step 1: Start Metro
+- Real-time drawing with pressure sensitivity
+- Physics-based brush effects that respond to device motion
+- Multiple brush textures (Normal, Chalk, Watercolor)
+- Customizable brush properties (size, opacity, color)
+- Performance monitoring with real-time FPS display
+- Fluid UI powered by React Native Reanimated
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Technical Overview
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+GestureCanvas showcases the power of React Native's Turbo Modules by implementing the core rendering and physics logic in C++. This approach provides several advantages:
 
-```sh
-# Using npm
-npm start
+- **Cross-platform native performance**: The C++ code runs natively on both iOS and Android
+- **Reduced bridge traffic**: Direct JSI calls without serialization overhead
+- **High-performance physics**: Complex calculations run efficiently in native code
+- **Smooth 60fps rendering**: Even with complex brush effects and fluid simulations
 
-# OR using Yarn
-yarn start
+## Architecture
+
+### JavaScript Layer
+
+- **React Components**: UI rendering and user interaction
+- **Reanimated**: Gesture handling and smooth animations
+- **Hooks**: Abstract native module interaction and sensor access
+
+### Native Layer
+
+- **C++ Turbo Module**: Cross-platform implementation for brush physics and rendering
+- **Canvas Management**: Efficient pixel buffer handling in C++
+- **Physics Engine**: Simulates brush dynamics and fluid interactions
+
+## Project Structure
+
+```
+GestureCanvas/
+├── ios/                      # iOS native code
+├── android/                  # Android native code
+├── shared/                   # C++ shared code
+│   ├── NativeGestureCanvas.h # C++ Turbo Module header
+│   ├── NativeGestureCanvas.cpp # C++ Turbo Module implementation
+│   ├── Canvas.h              # Canvas class header
+│   ├── Canvas.cpp            # Canvas implementation
+│   ├── BrushEngine.h         # Brush physics header
+│   ├── BrushEngine.cpp       # Brush physics implementation
+│   ├── Stroke.h              # Stroke tracking header
+│   └── Stroke.cpp            # Stroke implementation
+├── specs/                    # JavaScript specs for Codegen
+│   └── NativeGestureCanvas.ts # Turbo Module TypeScript specs
+├── components/               # React components
+│   ├── Canvas.tsx            # Drawing surface component
+│   └── BrushToolbar.tsx      # Brush customization UI
+├── hooks/                    # Custom React hooks
+│   ├── useCanvas.ts          # Canvas state management hook
+│   └── useMotionSensor.ts    # Device motion sensor access
+└── App.tsx                   # Main application component
 ```
 
-## Step 2: Build and run your app
+## Implementation Details
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Brush Physics
 
-### Android
+The C++ implementation includes sophisticated physics simulations for brush behavior:
 
-```sh
-# Using npm
-npm run android
+- Dampening factors for natural brush movement
+- Fluid response for paint flow and watercolor effects
+- Texture generation for different brush types
+- Motion impact from device accelerometer/gyroscope
 
-# OR using Yarn
-yarn android
+### Drawing Engine
+
+The drawing engine efficiently handles:
+
+- Canvas state management
+- Stroke path calculation
+- Color mixing algorithms
+- Pressure sensitivity mapping
+- Texture application
+
+### Performance Optimizations
+
+- Memory-efficient pixel buffer management
+- Optimized rendering loop targeting 60fps
+- Minimal data transfer between JS and native code
+- Efficient gesture processing with Reanimated worklets
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js and npm/yarn
+- React Native development environment
+- Xcode (for iOS)
+- Android Studio (for Android)
+
+### Installation
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/yourusername/GestureCanvas.git
+cd GestureCanvas
 ```
 
-### iOS
+2. Install dependencies
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```bash
+npm install
+# or
+yarn
 ```
 
-Then, and every time you update your native dependencies, run:
+3. Install CocoaPods dependencies (iOS)
 
-```sh
-bundle exec pod install
+```bash
+cd ios
+pod install
+cd ..
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+4. Run the app
 
-```sh
-# Using npm
-npm run ios
+```bash
+# iOS
+npx react-native run-ios
 
-# OR using Yarn
-yarn ios
+# Android
+npx react-native run-android
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## Learnings & Challenges
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Developing GestureCanvas provided valuable insights into:
 
-## Step 3: Modify your app
+1. **Turbo Module Implementation**: Creating cross-platform C++ modules that work seamlessly with React Native's new architecture.
 
-Now that you have successfully run the app, let's make changes!
+2. **JSI Communication**: Efficiently passing data between JavaScript and C++ without the overhead of serialization.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+3. **Memory Management**: Properly handling memory in C++ to avoid leaks, especially with large canvas buffers.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+4. **Gesture Optimization**: Using Reanimated worklets to process touch data on the UI thread for minimal latency.
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+5. **Sensor Integration**: Accessing and utilizing device motion sensors across platforms for interactive brush physics.
 
-## Congratulations! :tada:
+## Future Improvements
 
-You've successfully run and modified your React Native App. :partying_face:
+- Implement layer support for more complex artwork
+- Add undo/redo functionality
+- Support for loading and saving drawings
+- Additional brush types and effects
+- Color picker for more precise color selection
+- Shared canvas for collaborative drawing
 
-### Now what?
+## License
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+MIT
 
-# Troubleshooting
+## Acknowledgements
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- React Native Team for the new architecture and Turbo Modules
+- Software Mansion for React Native Reanimated and Gesture Handler
+- The open source community for valuable resources and inspiration
