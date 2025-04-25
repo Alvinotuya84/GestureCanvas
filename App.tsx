@@ -1,59 +1,89 @@
-import React from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
-  Button,
-  SafeAreaView,
+  StatusBar,
   StyleSheet,
-  Text,
-  TextInput,
   View,
+  AppState,
+  AppStateStatus,
 } from 'react-native';
-import NativeSampleModule from './specs/NativeSampleModule';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {Canvas} from './components/Canvas';
+import BrushToolbar from './components/BrushToolBar_';
+import {useMotionSensor} from './hooks/useMotionSenstor';
+import {BrushStyle} from './specs/NativeGestureCanvas';
 
-function App(): React.JSX.Element {
-  const [value, setValue] = React.useState('');
-  const [reversedValue, setReversedValue] = React.useState('');
+const DEFAULT_BRUSH_STYLE: BrushStyle = {
+  size: 15,
+  opacity: 0.8,
+  color: '#333333',
+  texture: 'normal',
+  dampening: 0.9,
+  fluidResponse: 0.5,
+};
 
-  const onPress = () => {
-    const revString = NativeSampleModule.reverseString(value);
-    setReversedValue(revString);
+const App: React.FC = () => {
+  const [brushStyle, setBrushStyle] = useState<BrushStyle>(DEFAULT_BRUSH_STYLE);
+  const {motion, isAvailable} = useMotionSensor(true);
+  const canvasClearFuncRef = useRef<(() => void) | null>(null);
+  const appState = useRef(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const handleAppStateChange = (nextAppState: AppStateStatus) => {
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === 'active'
+    ) {
+      // App has come to the foreground
+    }
+    appState.current = nextAppState;
+  };
+
+  const handleBrushChange = (newBrushStyle: BrushStyle) => {
+    setBrushStyle(newBrushStyle);
+  };
+
+  const handleClearCanvas = () => {
+    if (canvasClearFuncRef.current) {
+      canvasClearFuncRef.current();
+    }
+  };
+
+  const registerClearFunction = (clearFunc: () => void) => {
+    canvasClearFuncRef.current = clearFunc;
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View>
-        <Text style={styles.title}>
-          Welcome to C++ Turbo Native Module Example
-        </Text>
-        <Text>Write down here the text you want to reverse</Text>
-        <TextInput
-          style={styles.textInput}
-          placeholder="Write your text here"
-          onChangeText={setValue}
-          value={value}
+    <GestureHandlerRootView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      <View style={styles.container}>
+        <Canvas
+          brushStyle={brushStyle}
+          deviceMotion={motion}
+          registerClearFunction={registerClearFunction}
         />
-        <Button title="Reverse" onPress={onPress} />
-        <Text>Reversed text: {reversedValue}</Text>
+        <BrushToolbar
+          brushStyle={brushStyle}
+          onBrushChange={handleBrushChange}
+          onClearCanvas={handleClearCanvas}
+        />
       </View>
-    </SafeAreaView>
+    </GestureHandlerRootView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
-  textInput: {
-    borderColor: 'black',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginTop: 10,
+    backgroundColor: '#f5f5f5',
   },
 });
 
