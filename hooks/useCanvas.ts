@@ -1,5 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
-import {Alert, useWindowDimensions} from 'react-native';
+import {useWindowDimensions} from 'react-native';
 import NativeGestureCanvas, {
   BrushStyle,
   Point,
@@ -26,28 +26,27 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
 
   const statsTimerRef = useRef<NodeJS.Timeout | null>(null);
   const currentStrokeIdRef = useRef<number | null>(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     setBrushStyle(initialBrushStyle);
   }, [initialBrushStyle]);
 
-  // Helper function to update the snapshot
-  const updateSnapshot = useCallback(() => {
-    if (canvasState.canvasId === null) return '';
+  const updateSnapshot = useCallback((canvasId: number) => {
+    if (canvasId === null || !isMountedRef.current) return '';
 
-    const snapshot = NativeGestureCanvas.getCanvasSnapshot(
-      canvasState.canvasId,
-    );
-    console.log('Snapshot:', snapshot);
+    const snapshot = NativeGestureCanvas.getCanvasSnapshot(canvasId);
 
-    setCanvasState(prev => {
-      return {...prev, snapshot};
-    });
+    if (isMountedRef.current) {
+      setCanvasState(prev => ({...prev, snapshot}));
+    }
 
     return snapshot;
-  }, [canvasState.canvasId]);
+  }, []);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     const canvasId = NativeGestureCanvas.createCanvas({
       width,
       height,
@@ -57,36 +56,32 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
     setCanvasState(prev => ({...prev, canvasId}));
 
     statsTimerRef.current = setInterval(() => {
-      if (canvasState.canvasId !== null) {
+      if (canvasId !== null && isMountedRef.current) {
         const renderTime = NativeGestureCanvas.getAverageRenderTime();
         const fps =
           renderTime > 0 ? Math.min(60, Math.round(1000 / renderTime)) : 0;
 
         setPerformanceStats({fps});
-
-        updateSnapshot();
-        setCanvasState(prev => ({
-          ...prev,
-          averageRenderTime: renderTime,
-        }));
+        updateSnapshot(canvasId);
       }
     }, 500);
 
     return () => {
+      isMountedRef.current = false;
+
       if (statsTimerRef.current) {
         clearInterval(statsTimerRef.current);
       }
 
-      if (canvasState.canvasId !== null) {
-        NativeGestureCanvas.destroyCanvas(canvasState.canvasId);
+      if (canvasId !== null) {
+        NativeGestureCanvas.destroyCanvas(canvasId);
       }
     };
-  }, []);
+  }, [width, height, updateSnapshot]);
 
   const handleStartDrawing = useCallback(
     (point: Point) => {
-      console.log('point');
-      if (canvasState.canvasId === null) {
+      if (canvasState.canvasId === null || !isMountedRef.current) {
         return;
       }
 
@@ -95,16 +90,7 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
         point,
         brushStyle,
       );
-      console.log(
-        'Stroke started with ID:',
-        strokeId,
-        'Color:',
-        brushStyle.color,
-        'Size:',
-        brushStyle.size,
-      );
 
-      // Set both the ref and the state
       currentStrokeIdRef.current = strokeId;
       setCanvasState(prev => ({...prev, strokeId}));
       setIsDrawing(true);
@@ -114,21 +100,14 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
 
   const handleDrawMove = useCallback(
     (point: Point) => {
-      // Use the ref instead of state
       if (
         !isDrawing ||
         canvasState.canvasId === null ||
-        currentStrokeIdRef.current === null
+        currentStrokeIdRef.current === null ||
+        !isMountedRef.current
       ) {
         return;
       }
-
-      console.log(
-        'Adding point to stroke:',
-        currentStrokeIdRef.current,
-        point.x,
-        point.y,
-      );
 
       NativeGestureCanvas.addPointToStroke(
         canvasState.canvasId,
@@ -141,15 +120,13 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
 
   const handleEndDrawing = useCallback(
     (point: Point) => {
-      // Use the ref instead of state
       if (
         canvasState.canvasId === null ||
-        currentStrokeIdRef.current === null
+        currentStrokeIdRef.current === null ||
+        !isMountedRef.current
       ) {
         return;
       }
-
-      console.log('Ending stroke:', currentStrokeIdRef.current);
 
       NativeGestureCanvas.endStroke(
         canvasState.canvasId,
@@ -157,14 +134,17 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
         point,
       );
 
-      // Reset both the ref and the state
       currentStrokeIdRef.current = null;
-      setCanvasState(prev => ({...prev, strokeId: null}));
-      setIsDrawing(false);
 
-      // Add a delay for the snapshot update
+      if (isMountedRef.current) {
+        setCanvasState(prev => ({...prev, strokeId: null}));
+        setIsDrawing(false);
+      }
+
       setTimeout(() => {
-        updateSnapshot();
+        if (canvasState.canvasId !== null && isMountedRef.current) {
+          updateSnapshot(canvasState.canvasId);
+        }
       }, 100);
     },
     [canvasState.canvasId, updateSnapshot],
@@ -172,7 +152,7 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
 
   const applyMotion = useCallback(
     (accelerationX: number, accelerationY: number, accelerationZ: number) => {
-      if (canvasState.canvasId === null) return;
+      if (canvasState.canvasId === null || !isMountedRef.current) return;
 
       NativeGestureCanvas.applyMotionToCanvas(
         canvasState.canvasId,
@@ -185,10 +165,13 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
   );
 
   const clearCanvas = useCallback(() => {
-    if (canvasState.canvasId === null) return;
+    if (canvasState.canvasId === null || !isMountedRef.current) return;
 
     NativeGestureCanvas.clearCanvas(canvasState.canvasId);
-    updateSnapshot();
+
+    if (isMountedRef.current && canvasState.canvasId !== null) {
+      updateSnapshot(canvasState.canvasId);
+    }
   }, [canvasState.canvasId, updateSnapshot]);
 
   return {
