@@ -25,6 +25,7 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
   const [performanceStats, setPerformanceStats] = useState({fps: 0});
 
   const statsTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const currentStrokeIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     setBrushStyle(initialBrushStyle);
@@ -37,16 +38,9 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
     const snapshot = NativeGestureCanvas.getCanvasSnapshot(
       canvasState.canvasId,
     );
-    console.log(
-      'In hook - obtained snapshot:',
-      snapshot ? 'Has value' : 'Empty',
-    );
+    console.log('Snapshot:', snapshot);
 
     setCanvasState(prev => {
-      //   console.log(
-      //     'Previous state before update:',
-      //     prev.snapshot ? 'Has value' : 'Empty',
-      //   );
       return {...prev, snapshot};
     });
 
@@ -91,19 +85,27 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
 
   const handleStartDrawing = useCallback(
     (point: Point) => {
+      console.log('point');
       if (canvasState.canvasId === null) {
-        console.log('Canvas ID is null!');
         return;
       }
 
-      console.log('Beginning stroke with point:', point);
       const strokeId = NativeGestureCanvas.beginStroke(
         canvasState.canvasId,
         point,
         brushStyle,
       );
-      console.log('Stroke ID returned:', strokeId);
+      console.log(
+        'Stroke started with ID:',
+        strokeId,
+        'Color:',
+        brushStyle.color,
+        'Size:',
+        brushStyle.size,
+      );
 
+      // Set both the ref and the state
+      currentStrokeIdRef.current = strokeId;
       setCanvasState(prev => ({...prev, strokeId}));
       setIsDrawing(true);
     },
@@ -112,40 +114,60 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
 
   const handleDrawMove = useCallback(
     (point: Point) => {
+      // Use the ref instead of state
       if (
         !isDrawing ||
         canvasState.canvasId === null ||
-        canvasState.strokeId === null
+        currentStrokeIdRef.current === null
       ) {
         return;
       }
 
+      console.log(
+        'Adding point to stroke:',
+        currentStrokeIdRef.current,
+        point.x,
+        point.y,
+      );
+
       NativeGestureCanvas.addPointToStroke(
         canvasState.canvasId,
-        canvasState.strokeId,
+        currentStrokeIdRef.current,
         point,
       );
     },
-    [isDrawing, canvasState.canvasId, canvasState.strokeId],
+    [isDrawing, canvasState.canvasId],
   );
 
   const handleEndDrawing = useCallback(
     (point: Point) => {
-      if (canvasState.canvasId === null || canvasState.strokeId === null) {
+      // Use the ref instead of state
+      if (
+        canvasState.canvasId === null ||
+        currentStrokeIdRef.current === null
+      ) {
         return;
       }
 
+      console.log('Ending stroke:', currentStrokeIdRef.current);
+
       NativeGestureCanvas.endStroke(
         canvasState.canvasId,
-        canvasState.strokeId,
+        currentStrokeIdRef.current,
         point,
       );
 
+      // Reset both the ref and the state
+      currentStrokeIdRef.current = null;
       setCanvasState(prev => ({...prev, strokeId: null}));
       setIsDrawing(false);
-      updateSnapshot();
+
+      // Add a delay for the snapshot update
+      setTimeout(() => {
+        updateSnapshot();
+      }, 100);
     },
-    [canvasState.canvasId, canvasState.strokeId, updateSnapshot],
+    [canvasState.canvasId, updateSnapshot],
   );
 
   const applyMotion = useCallback(

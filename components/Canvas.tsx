@@ -5,6 +5,7 @@ import {
   Image,
   useWindowDimensions,
   Alert,
+  Text,
 } from 'react-native';
 import Animated, {
   useAnimatedGestureHandler,
@@ -123,26 +124,41 @@ export const Canvas: React.FC<CanvasProps> = ({
     };
   });
 
-  useEffect(() => {
-    console.log(
-      'Canvas component - canvasState.snapshot:',
-      canvasState.snapshot ? 'has value' : 'Empty',
-    );
-    console.log(
-      'Canvas component - canvasState.canvasId:',
-      canvasState.canvasId,
-    );
-  }, [canvasState]);
+  //   useEffect(() => {
+  //     console.log(
+  //       'Canvas component - canvasState.snapshot:',
+  //       canvasState.snapshot ? 'has value' : 'Empty',
+  //     );
+  //     console.log(
+  //       'Canvas component - canvasState.canvasId:',
+  //       canvasState.canvasId,
+  //     );
+  //   }, [canvasState]);
 
   return (
     <View style={styles.container}>
+      {/* <Image
+        source={{uri: canvasState.snapshot}}
+        style={[styles.canvas, {width, height}]}
+      /> */}
       <PanGestureHandler onGestureEvent={gestureHandler}>
         <Animated.View style={styles.gestureContainer}>
           {canvasState.snapshot ? (
-            <Image
-              source={{uri: canvasState.snapshot}}
-              style={[styles.canvas, {width, height}]}
-            />
+            <>
+              <Image
+                source={{uri: canvasState.snapshot}}
+                style={[styles.canvas, {width, height}]}
+              />
+              <Text
+                style={{
+                  position: 'absolute',
+                  top: 10,
+                  left: 10,
+                  backgroundColor: 'white',
+                }}>
+                Snapshot length: {canvasState.snapshot.length}
+              </Text>
+            </>
           ) : (
             <View style={[styles.emptyCanvas, {width, height}]} />
           )}
@@ -187,7 +203,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   canvas: {
-    position: 'absolute',
+    borderColor: 'red',
+    borderWidth: 2,
   },
   emptyCanvas: {
     backgroundColor: 'red',
