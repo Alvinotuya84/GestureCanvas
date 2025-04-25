@@ -219,7 +219,8 @@ public:
   std::string getSnapshotAsBase64() {
     std::string result = "data:image/png;base64,";
     
-   
+    // In a real implementation, we would convert the pixel data to PNG and encode as base64
+    // This is a simplified stub
     result += "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==";
     
     return result;
