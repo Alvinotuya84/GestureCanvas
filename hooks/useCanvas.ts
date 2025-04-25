@@ -1,5 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
-import {useWindowDimensions} from 'react-native';
+import {Alert, useWindowDimensions} from 'react-native';
 import NativeGestureCanvas, {
   BrushStyle,
   Point,
@@ -30,6 +30,29 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
     setBrushStyle(initialBrushStyle);
   }, [initialBrushStyle]);
 
+  // Helper function to update the snapshot
+  const updateSnapshot = useCallback(() => {
+    if (canvasState.canvasId === null) return '';
+
+    const snapshot = NativeGestureCanvas.getCanvasSnapshot(
+      canvasState.canvasId,
+    );
+    console.log(
+      'In hook - obtained snapshot:',
+      snapshot ? 'Has value' : 'Empty',
+    );
+
+    setCanvasState(prev => {
+      //   console.log(
+      //     'Previous state before update:',
+      //     prev.snapshot ? 'Has value' : 'Empty',
+      //   );
+      return {...prev, snapshot};
+    });
+
+    return snapshot;
+  }, [canvasState.canvasId]);
+
   useEffect(() => {
     const canvasId = NativeGestureCanvas.createCanvas({
       width,
@@ -47,12 +70,9 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
 
         setPerformanceStats({fps});
 
-        const snapshot = NativeGestureCanvas.getCanvasSnapshot(
-          canvasState.canvasId,
-        );
+        updateSnapshot();
         setCanvasState(prev => ({
           ...prev,
-          snapshot,
           averageRenderTime: renderTime,
         }));
       }
@@ -123,13 +143,9 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
 
       setCanvasState(prev => ({...prev, strokeId: null}));
       setIsDrawing(false);
-
-      const snapshot = NativeGestureCanvas.getCanvasSnapshot(
-        canvasState.canvasId,
-      );
-      setCanvasState(prev => ({...prev, snapshot}));
+      updateSnapshot();
     },
-    [canvasState.canvasId, canvasState.strokeId],
+    [canvasState.canvasId, canvasState.strokeId, updateSnapshot],
   );
 
   const applyMotion = useCallback(
@@ -150,12 +166,8 @@ export const useCanvas = (initialBrushStyle: BrushStyle) => {
     if (canvasState.canvasId === null) return;
 
     NativeGestureCanvas.clearCanvas(canvasState.canvasId);
-
-    const snapshot = NativeGestureCanvas.getCanvasSnapshot(
-      canvasState.canvasId,
-    );
-    setCanvasState(prev => ({...prev, snapshot}));
-  }, [canvasState.canvasId]);
+    updateSnapshot();
+  }, [canvasState.canvasId, updateSnapshot]);
 
   return {
     canvasState,

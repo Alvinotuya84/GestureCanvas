@@ -1,5 +1,11 @@
 import React, {useEffect} from 'react';
-import {StyleSheet, View, Image, useWindowDimensions} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Image,
+  useWindowDimensions,
+  Alert,
+} from 'react-native';
 import Animated, {
   useAnimatedGestureHandler,
   runOnJS,
@@ -117,6 +123,17 @@ export const Canvas: React.FC<CanvasProps> = ({
     };
   });
 
+  useEffect(() => {
+    console.log(
+      'Canvas component - canvasState.snapshot:',
+      canvasState.snapshot ? 'has value' : 'Empty',
+    );
+    console.log(
+      'Canvas component - canvasState.canvasId:',
+      canvasState.canvasId,
+    );
+  }, [canvasState]);
+
   return (
     <View style={styles.container}>
       <PanGestureHandler onGestureEvent={gestureHandler}>
@@ -173,7 +190,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   emptyCanvas: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'red',
   },
   cursor: {
     position: 'absolute',

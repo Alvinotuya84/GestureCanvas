@@ -23,7 +23,9 @@ private:
   int height_;
   uint32_t backgroundColor_;
   std::vector<uint32_t> pixelData_;
-  std::vector<uint8_t> fluidLayer_; // For fluid dynamics simulation
+  std::vector<uint8_t> fluidLayer_; 
+  std::string base64_encode(const std::vector<uint8_t>& input);
+
 };
 
 } 
