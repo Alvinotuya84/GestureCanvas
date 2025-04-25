@@ -1,12 +1,14 @@
-//
-//  NativeGestureCanvasProvider.m
-//  GestureCanvas
-//
-//  Created by Alvin on 25/04/2025.
-//
-
 #import "NativeGestureCanvasProvider.h"
+#import <ReactCommon/CallInvoker.h>
+#import <ReactCommon/TurboModule.h>
+#import "NativeGestureCanvas.h" // Our C++ module header
 
 @implementation NativeGestureCanvasProvider
+
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+  return std::make_shared<facebook::react::NativeGestureCanvas>(params.jsInvoker);
+}
 
 @end
