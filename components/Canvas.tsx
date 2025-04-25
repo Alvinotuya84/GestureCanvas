@@ -1,11 +1,12 @@
-import React, {useEffect} from 'react';
-import {StyleSheet, View, Image, useWindowDimensions} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {StyleSheet, View, Image, useWindowDimensions, Text} from 'react-native';
 import Animated, {
   useAnimatedGestureHandler,
   runOnJS,
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  useDerivedValue,
 } from 'react-native-reanimated';
 import {
   PanGestureHandler,
@@ -44,16 +45,25 @@ export const Canvas: React.FC<CanvasProps> = ({
   const cursorX = useSharedValue(width / 2);
   const cursorY = useSharedValue(height / 2);
   const cursorScale = useSharedValue(1);
+  const lastMotionUpdate = useRef(0);
 
   useEffect(() => {
     registerClearFunction(clearCanvas);
   }, [clearCanvas, registerClearFunction]);
 
   useEffect(() => {
+    const now = Date.now();
     if (deviceMotion.x !== 0 || deviceMotion.y !== 0 || deviceMotion.z !== 0) {
-      applyMotion(deviceMotion.x, deviceMotion.y, deviceMotion.z);
+      if (now - lastMotionUpdate.current > 100) {
+        applyMotion(deviceMotion.x, deviceMotion.y, deviceMotion.z);
+        lastMotionUpdate.current = now;
+      }
     }
   }, [deviceMotion, applyMotion]);
+
+  const cursorColor = useDerivedValue(() => {
+    return brushStyle.texture === 'eraser' ? '#FFFFFF' : brushStyle.color;
+  }, [brushStyle.texture, brushStyle.color]);
 
   const gestureHandler = useAnimatedGestureHandler<
     PanGestureHandlerGestureEvent,
@@ -112,10 +122,16 @@ export const Canvas: React.FC<CanvasProps> = ({
         {translateY: cursorY.value},
         {scale: cursorScale.value},
       ],
-      backgroundColor: brushStyle.color,
-      opacity: 0.5,
+      backgroundColor: cursorColor.value,
+      opacity: brushStyle.texture === 'eraser' ? 0.3 : 0.5,
+      width: brushStyle.size,
+      height: brushStyle.size,
+      borderRadius: brushStyle.size / 2,
+      marginLeft: -brushStyle.size / 2,
+      marginTop: -brushStyle.size / 2,
+      position: 'absolute',
     };
-  });
+  }, [brushStyle.size, cursorColor]);
 
   return (
     <View style={styles.container}>
@@ -125,18 +141,13 @@ export const Canvas: React.FC<CanvasProps> = ({
             <Image
               source={{uri: canvasState.snapshot}}
               style={[styles.canvas, {width, height}]}
+              resizeMode="cover"
             />
           ) : (
             <View style={[styles.emptyCanvas, {width, height}]} />
           )}
 
-          <Animated.View
-            style={[
-              styles.cursor,
-              cursorStyle,
-              {width: brushStyle.size, height: brushStyle.size},
-            ]}
-          />
+          <Animated.View style={cursorStyle} />
 
           {performanceStats.fps > 0 && (
             <View style={styles.fpsContainer}>
@@ -150,9 +161,7 @@ export const Canvas: React.FC<CanvasProps> = ({
                 ]}
               />
               <View style={styles.fpsTextContainer}>
-                <Animated.Text style={styles.fpsText}>
-                  {performanceStats.fps} FPS
-                </Animated.Text>
+                <Text style={styles.fpsText}>{performanceStats.fps} FPS</Text>
               </View>
             </View>
           )}
@@ -165,23 +174,21 @@ export const Canvas: React.FC<CanvasProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   gestureContainer: {
     flex: 1,
   },
   canvas: {
-    position: 'absolute',
+    flex: 1,
   },
   emptyCanvas: {
     backgroundColor: '#FFFFFF',
+    flex: 1,
   },
   cursor: {
     position: 'absolute',
     borderRadius: 100,
-    width: 20,
-    height: 20,
-    marginLeft: -10,
-    marginTop: -10,
   },
   fpsContainer: {
     position: 'absolute',
