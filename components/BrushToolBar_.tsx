@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, View, TouchableOpacity, Text} from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -8,6 +8,7 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import {BrushStyle} from '../specs/NativeGestureCanvas';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface BrushToolbarProps {
   brushStyle: BrushStyle;
@@ -41,10 +42,15 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
 }) => {
   const animatedHeight = useSharedValue(70);
   const expanded = useSharedValue(false);
+  const clearButtonScale = useSharedValue(1);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleToolbar = () => {
+    // Update both the shared value and React state
     expanded.value = !expanded.value;
-    animatedHeight.value = withTiming(expanded.value ? 280 : 70, {
+    setIsExpanded(!isExpanded);
+
+    animatedHeight.value = withTiming(expanded.value ? 300 : 70, {
       duration: 300,
     });
   };
@@ -68,8 +74,8 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
   };
 
   const handleClear = () => {
-    const scaleAnim = useSharedValue(1);
-    scaleAnim.value = withSequence(
+    // Use the previously declared shared value
+    clearButtonScale.value = withSequence(
       withTiming(1.2, {duration: 150}),
       withTiming(1, {duration: 150}),
     );
@@ -102,7 +108,11 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
     <Animated.View style={[styles.container, containerStyle]}>
       <View style={styles.header}>
         <TouchableOpacity style={styles.expandButton} onPress={toggleToolbar}>
-          <Text style={styles.expandIcon}>{expanded.value ? '▼' : '▲'}</Text>
+          <Icon
+            name={isExpanded ? 'chevron-down' : 'chevron-up'}
+            size={24}
+            color="white"
+          />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
@@ -110,7 +120,7 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
         </TouchableOpacity>
       </View>
 
-      {expanded.value && (
+      {!isExpanded && (
         <>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Size</Text>
@@ -146,6 +156,17 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
                       styles.selectedTextureButton,
                   ]}
                   onPress={() => handleTextureChange(texture.value)}>
+                  <Icon
+                    name={
+                      texture.value === 'normal'
+                        ? 'brush'
+                        : texture.value === 'chalk'
+                        ? 'format-paint'
+                        : 'water'
+                    }
+                    size={18}
+                    color="white"
+                  />
                   <Text style={styles.textureText}>{texture.name}</Text>
                 </TouchableOpacity>
               ))}
