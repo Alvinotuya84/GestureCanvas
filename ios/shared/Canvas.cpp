@@ -49,7 +49,6 @@ void Canvas::applyStrokeLine(double x1, double y1, double x2, double y2,
   double dy = y2 - y1;
   double length = std::sqrt(dx * dx + dy * dy);
   
-  // If points are very close, just draw a single point
   if (length < 1.0) {
     int centerX = static_cast<int>(x1);
     int centerY = static_cast<int>(y1);
@@ -88,11 +87,9 @@ void Canvas::applyStrokeLine(double x1, double y1, double x2, double y2,
     return;
   }
   
-  // For longer lines, normalize direction vector
   dx /= length;
   dy /= length;
   
-  // Apply texture effects
   double textureEffect = 1.0;
   static std::random_device rd;
   static std::mt19937 gen(rd());
@@ -104,14 +101,12 @@ void Canvas::applyStrokeLine(double x1, double y1, double x2, double y2,
     textureEffect = 1.2;
   }
   
-  // Draw the stroke by sampling points along the line
   const int steps = static_cast<int>(length) * 2; // More steps for smoother lines
   for (int i = 0; i <= steps; ++i) {
     double t = i / static_cast<double>(steps);
     double x = x1 + dx * length * t;
     double y = y1 + dy * length * t;
     
-    // Adjust brush size based on position along stroke for more natural look
     double strokeProgress = std::min(t, 1.0 - t) * 2.0;
     double strokeSizeFactor = 0.5 + 0.5 * std::pow(strokeProgress, 0.5);
     double brushSize = adjustedSize * strokeSizeFactor * textureEffect;
@@ -120,18 +115,14 @@ void Canvas::applyStrokeLine(double x1, double y1, double x2, double y2,
     int centerY = static_cast<int>(y);
     int radius = static_cast<int>(brushSize / 2.0);
     
-    // Draw a brush stamp at this position
     for (int py = std::max(0, centerY - radius); py < std::min(height_, centerY + radius + 1); ++py) {
       for (int px = std::max(0, centerX - radius); px < std::min(width_, centerX + radius + 1); ++px) {
         double distance = std::sqrt(std::pow(px - x, 2) + std::pow(py - y, 2));
         if (distance <= radius) {
-          // Apply falloff based on distance from center
           double falloff = texture == "watercolor" ? 0.7 : 2.0;
           double alpha = std::pow(1.0 - distance / radius, falloff) * opacity * pressure;
           
-          // Apply texture effects
           if (texture == "chalk") {
-            // Simple noise effect for chalk
             double noise = std::sin(px * 0.8) * std::cos(py * 0.8) * 0.2 + 0.8;
             alpha *= noise;
           }
@@ -154,13 +145,11 @@ void Canvas::applyStrokeLine(double x1, double y1, double x2, double y2,
             uint8_t resultR, resultG, resultB;
             
             if (texture == "watercolor") {
-              // Softer blending for watercolor
               blendFactor *= 0.7;
               resultR = static_cast<uint8_t>(existingR * (1.0 - blendFactor) + newR * blendFactor);
               resultG = static_cast<uint8_t>(existingG * (1.0 - blendFactor) + newG * blendFactor);
               resultB = static_cast<uint8_t>(existingB * (1.0 - blendFactor) + newB * blendFactor);
             } else {
-              // Normal blending for other brushes
               resultR = static_cast<uint8_t>(existingR * (1.0 - blendFactor) + newR * blendFactor);
               resultG = static_cast<uint8_t>(existingG * (1.0 - blendFactor) + newG * blendFactor);
               resultB = static_cast<uint8_t>(existingB * (1.0 - blendFactor) + newB * blendFactor);
@@ -170,7 +159,6 @@ void Canvas::applyStrokeLine(double x1, double y1, double x2, double y2,
             
             pixelData_[index] = (resultA << 24) | (resultR << 16) | (resultG << 8) | resultB;
             
-            // Update fluid simulation data for watercolor effect
             if (texture == "watercolor") {
               if ((index * 2 + 1) < fluidLayer_.size()) {
                 fluidLayer_[index * 2] += static_cast<uint8_t>(dx * pressure * 20);
@@ -187,22 +175,18 @@ void Canvas::applyStrokeLine(double x1, double y1, double x2, double y2,
 void Canvas::applyPhysics(double accelX, double accelY, double accelZ) {
   double accelMagnitude = std::sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ);
   if (accelMagnitude < 0.5) {
-    return; // Ignore small movements
+    return; 
   }
   
-  // Normalize acceleration vector
   double normalizer = 1.0 / accelMagnitude;
   accelX *= normalizer;
   accelY *= normalizer;
   
-  // Make a copy of pixel data to work with
   std::vector<uint32_t> newPixelData = pixelData_;
   
-  // Calculate flow direction based on acceleration
   int flowX = static_cast<int>(accelX * 5);
   int flowY = static_cast<int>(accelY * 5);
   
-  // Apply fluid simulation
   for (int y = 0; y < height_; ++y) {
     for (int x = 0; x < width_; ++x) {
       int sourceIndex = y * width_ + x;
@@ -213,20 +197,16 @@ void Canvas::applyPhysics(double accelX, double accelY, double accelZ) {
       int velX = fluidLayer_[fluidIndex];
       int velY = fluidLayer_[fluidIndex + 1];
       
-      // Skip pixels with no velocity
       if (velX == 0 && velY == 0) {
         continue;
       }
       
-      // Calculate total flow including acceleration influence
       int totalFlowX = flowX + velX / 10;
       int totalFlowY = flowY + velY / 10;
       
-      // Calculate target pixel position
       int targetX = x + totalFlowX;
       int targetY = y + totalFlowY;
       
-      // Ensure target position is within canvas bounds
       if (targetX >= 0 && targetX < width_ && targetY >= 0 && targetY < height_) {
         int targetIndex = targetY * width_ + targetX;
         
@@ -234,7 +214,6 @@ void Canvas::applyPhysics(double accelX, double accelY, double accelZ) {
           uint32_t sourceColor = pixelData_[sourceIndex];
           uint32_t targetColor = newPixelData[targetIndex];
           
-          // Extract color components
           uint8_t sourceA = (sourceColor >> 24) & 0xFF;
           uint8_t sourceR = (sourceColor >> 16) & 0xFF;
           uint8_t sourceG = (sourceColor >> 8) & 0xFF;
@@ -245,7 +224,6 @@ void Canvas::applyPhysics(double accelX, double accelY, double accelZ) {
           uint8_t targetG = (targetColor >> 8) & 0xFF;
           uint8_t targetB = targetColor & 0xFF;
           
-          // Apply gentle blending for fluid effect
           double blendFactor = 0.1;
           
           uint8_t resultR = static_cast<uint8_t>(targetR * (1.0 - blendFactor) + sourceR * blendFactor);
@@ -255,7 +233,6 @@ void Canvas::applyPhysics(double accelX, double accelY, double accelZ) {
           
           newPixelData[targetIndex] = (resultA << 24) | (resultR << 16) | (resultG << 8) | resultB;
           
-          // Gradually reduce velocity (damping)
           fluidLayer_[fluidIndex] = static_cast<uint8_t>(velX * 0.95);
           fluidLayer_[fluidIndex + 1] = static_cast<uint8_t>(velY * 0.95);
         }
@@ -263,7 +240,6 @@ void Canvas::applyPhysics(double accelX, double accelY, double accelZ) {
     }
   }
   
-  // Update pixel data with new values
   pixelData_ = newPixelData;
 }
 
@@ -298,15 +274,13 @@ std::string Canvas::base64_encode(const std::vector<uint8_t>& input) {
 }
 
 std::string Canvas::getSnapshotAsBase64() {
-    // Calculate BMP file size (header + pixel data)
     const int headerSize = sizeof(BMPHeader);
     const int rowSize = ((width_ * 24 + 31) / 32) * 4; // Row size must be multiple of 4 bytes
     const int pixelDataSize = rowSize * height_;
     const int fileSize = headerSize + pixelDataSize;
     
-    // Create header
     BMPHeader header;
-    header.fileType = 0x4D42; // "BM"
+    header.fileType = 0x4D42; 
     header.fileSize = fileSize;
     header.reserved1 = 0;
     header.reserved2 = 0;
@@ -346,7 +320,6 @@ std::string Canvas::getSnapshotAsBase64() {
         }
     }
     
-    // Encode to base64
     std::string base64Data = base64_encode(bmpData);
     
     return "data:image/bmp;base64," + base64Data;

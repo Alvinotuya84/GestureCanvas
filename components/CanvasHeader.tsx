@@ -40,7 +40,6 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
       <View style={styles.headerContent}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}></Text>
-          {/* <Text style={styles.subtitle}>Drawing with c++ physics</Text> */}
         </View>
 
         <View style={styles.statsContainer}>
