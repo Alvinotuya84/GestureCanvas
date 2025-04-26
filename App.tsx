@@ -9,7 +9,7 @@ import {
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {Canvas} from './components/Canvas';
 import BrushToolbar from './components/BrushToolBar_';
-import {useMotionSensor} from './hooks/useMotionSenstor';
+import {useMotionSensor} from './hooks/useMotionSensor';
 import {BrushStyle} from './specs/NativeGestureCanvas';
 
 const DEFAULT_BRUSH_STYLE: BrushStyle = {
@@ -23,7 +23,8 @@ const DEFAULT_BRUSH_STYLE: BrushStyle = {
 
 const App: React.FC = () => {
   const [brushStyle, setBrushStyle] = useState<BrushStyle>(DEFAULT_BRUSH_STYLE);
-  const {motion, isAvailable} = useMotionSensor(true);
+  const [motionEnabled, setMotionEnabled] = useState(true);
+  const {motion, isAvailable} = useMotionSensor(motionEnabled);
   const canvasClearFuncRef = useRef<(() => void) | null>(null);
   const appState = useRef(AppState.currentState);
 
@@ -32,6 +33,7 @@ const App: React.FC = () => {
       'change',
       handleAppStateChange,
     );
+
     return () => {
       subscription.remove();
     };
@@ -42,7 +44,6 @@ const App: React.FC = () => {
       appState.current.match(/inactive|background/) &&
       nextAppState === 'active'
     ) {
-      // App has come to the foreground
     }
     appState.current = nextAppState;
   };

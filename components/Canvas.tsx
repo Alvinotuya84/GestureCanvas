@@ -14,6 +14,7 @@ import {
 } from 'react-native-gesture-handler';
 import {useCanvas} from '../hooks/useCanvas';
 import {Point, BrushStyle} from '../specs/NativeGestureCanvas';
+import {CanvasHeader} from './CanvasHeader';
 
 interface CanvasProps {
   brushStyle: BrushStyle;
@@ -46,6 +47,7 @@ export const Canvas: React.FC<CanvasProps> = ({
   const cursorY = useSharedValue(height / 2);
   const cursorScale = useSharedValue(1);
   const lastMotionUpdate = useRef(0);
+  const isDrawing = useSharedValue(false);
 
   useEffect(() => {
     registerClearFunction(clearCanvas);
@@ -76,6 +78,7 @@ export const Canvas: React.FC<CanvasProps> = ({
       cursorX.value = event.x;
       cursorY.value = event.y;
       cursorScale.value = withSpring(brushStyle.size / 20);
+      isDrawing.value = true;
 
       const point: Point = {
         x: event.x,
@@ -103,6 +106,7 @@ export const Canvas: React.FC<CanvasProps> = ({
 
     onEnd: event => {
       cursorScale.value = withSpring(1);
+      isDrawing.value = false;
 
       const point: Point = {
         x: event.x,
@@ -148,25 +152,11 @@ export const Canvas: React.FC<CanvasProps> = ({
           )}
 
           <Animated.View style={cursorStyle} />
-
-          {performanceStats.fps > 0 && (
-            <View style={styles.fpsContainer}>
-              <View
-                style={[
-                  styles.fpsIndicator,
-                  {
-                    backgroundColor:
-                      performanceStats.fps > 30 ? '#4CAF50' : '#F44336',
-                  },
-                ]}
-              />
-              <View style={styles.fpsTextContainer}>
-                <Text style={styles.fpsText}>{performanceStats.fps} FPS</Text>
-              </View>
-            </View>
-          )}
         </Animated.View>
       </PanGestureHandler>
+
+      {/* Add the new header component */}
+      <CanvasHeader performanceStats={performanceStats} />
     </View>
   );
 };
@@ -189,29 +179,5 @@ const styles = StyleSheet.create({
   cursor: {
     position: 'absolute',
     borderRadius: 100,
-  },
-  fpsContainer: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    borderRadius: 15,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  fpsIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 6,
-  },
-  fpsTextContainer: {
-    minWidth: 50,
-  },
-  fpsText: {
-    color: 'white',
-    fontVariant: ['tabular-nums'],
   },
 });

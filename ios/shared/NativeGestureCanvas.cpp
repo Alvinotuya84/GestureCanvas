@@ -361,27 +361,33 @@ int NativeGestureCanvas::beginStroke(jsi::Runtime& rt, int canvasId, jsi::Object
   auto brushEngine = std::make_shared<BrushEngine>();
   
   std::string colorHex = brushStyleData["color"].asString(rt).utf8(rt);
-  uint32_t color = 0xFF000000;
+  uint32_t color = 0xFF000000; 
+
+if (colorHex.length() > 0 && colorHex[0] == '#') {
+  colorHex = colorHex.substr(1); 
   
-  if (colorHex.length() > 0 && colorHex[0] == '#') {
-    colorHex = colorHex.substr(1);
-    std::stringstream ss;
-    ss << std::hex << colorHex;
-    ss >> color;
+  unsigned int hexValue = 0;
+  std::stringstream ss;
+  ss << std::hex << colorHex;
+  ss >> hexValue;
+  
+  if (colorHex.length() == 6) {
+    uint8_t r = (hexValue >> 16) & 0xFF;
+    uint8_t g = (hexValue >> 8) & 0xFF;
+    uint8_t b = hexValue & 0xFF;
     
-    if (colorHex.length() == 6) {
-      color = (color << 8) | 0xFF;
-    }
+    color = (0xFF << 24) | (r << 16) | (g << 8) | b;
   }
+}
   
-  brushEngine->configureBrush(
-    brushStyleData["size"].asNumber(),
-    brushStyleData["opacity"].asNumber(),
-    color,
-    brushStyleData["texture"].asString(rt).utf8(rt),
-    brushStyleData["dampening"].asNumber(),
-    brushStyleData["fluidResponse"].asNumber()
-  );
+ brushEngine->configureBrush(
+  brushStyleData["size"].asNumber(),
+  brushStyleData["opacity"].asNumber(),
+  color, 
+  brushStyleData["texture"].asString(rt).utf8(rt),
+  brushStyleData["dampening"].asNumber(),
+  brushStyleData["fluidResponse"].asNumber()
+);
   
   int strokeId = nextStrokeId_++;
   auto stroke = std::make_shared<Stroke>(brushEngine);
