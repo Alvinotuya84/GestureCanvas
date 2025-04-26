@@ -39,10 +39,8 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
     <Animated.View style={[styles.container, animatedStyle]}>
       <View style={styles.headerContent}>
         <View style={styles.titleContainer}>
-          {/* <Text style={styles.title}>Turbo</Text> */}
-          <Text style={styles.subtitle}>
-            {/* High-performance drawing with C++ TurboModules */}
-          </Text>
+          <Text style={styles.title}></Text>
+          {/* <Text style={styles.subtitle}>Drawing with c++ physics</Text> */}
         </View>
 
         <View style={styles.statsContainer}>
@@ -67,12 +65,6 @@ export const CanvasHeader: React.FC<CanvasHeaderProps> = ({
             </View>
           )}
         </View>
-      </View>
-
-      <View style={styles.toolTip}>
-        <Text style={styles.toolTipText}>
-          {/* Try different brush styles and motion effects */}
-        </Text>
       </View>
     </Animated.View>
   );

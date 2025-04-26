@@ -29,26 +29,25 @@ const BRUSH_TEXTURES = [
   {name: 'Normal', value: 'normal'},
   {name: 'Chalk', value: 'chalk'},
   {name: 'Watercolor', value: 'watercolor'},
-  {name: 'Eraser', value: 'eraser'}, // Added eraser as a texture type
+  {name: 'Eraser', value: 'eraser'},
 ];
 const COLORS = [
-  '#000000',
-  '#FFFFFF',
-  '#FF0000',
-  '#00FF00',
-  '#0000FF',
-  '#FFFF00',
-  '#FF00FF',
-  '#00FFFF',
-  '#FF5500',
-  '#55FF00',
+  'white',
+  // colors in full name
+  'black',
+  'red',
+  'green',
+  'blue',
+  'yellow',
+  'orange',
+  'purple',
+  'pink',
 ];
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 
-// Increased expanded height to ensure all content is visible
 const COLLAPSED_HEIGHT = 70;
-const EXPANDED_HEIGHT = 500; // Increased from 300 to 420
+const EXPANDED_HEIGHT = 500;
 
 const BrushToolbar: React.FC<BrushToolbarProps> = ({
   brushStyle,
@@ -77,10 +76,8 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
   const toggleDock = () => {
     setIsDocked(!isDocked);
     if (isDocked) {
-      // Undock the toolbar
       positionY.value = withTiming(SCREEN_HEIGHT - 300);
     } else {
-      // Dock the toolbar
       positionY.value = withTiming(SCREEN_HEIGHT - COLLAPSED_HEIGHT);
       positionX.value = withTiming(0);
     }
@@ -92,14 +89,12 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
       ctx.startY = positionY.value;
     },
     onActive: (event, ctx) => {
-      // Only allow dragging when undocked
       if (!isDocked) {
         positionX.value = ctx.startX + event.translationX;
         positionY.value = ctx.startY + event.translationY;
       }
     },
     onEnd: _ => {
-      // Keep toolbar on screen
       if (positionX.value < 0) {
         positionX.value = withTiming(0);
       } else if (positionX.value > SCREEN_WIDTH - 150) {
@@ -139,47 +134,41 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
 
   const handleTextureChange = (texture: string) => {
     if (texture === 'eraser') {
-      // If switching to eraser, save current brush style and set eraser properties
       if (brushStyle.texture !== 'eraser') {
         setPreviousBrushStyle({...brushStyle});
-        // For eraser, we set color to match the background, increase size, and use normal texture rendering
         onBrushChange({
           ...brushStyle,
           texture: 'eraser',
-          color: '#FFFFFF', // Match the canvas background color
-          opacity: 1.0, // Full opacity for the eraser
+          color: '#FFFFFF',
+          opacity: 1.0,
         });
       }
     } else if (brushStyle.texture === 'eraser' && previousBrushStyle) {
-      // If switching from eraser to another texture, restore previous settings but with the new texture
       onBrushChange({
         ...previousBrushStyle,
         texture: texture,
       });
     } else {
-      // Normal texture change
       onBrushChange({...brushStyle, texture});
     }
   };
 
   const handleColorChange = (color: string) => {
-    // If we're in eraser mode, switch back to normal mode with the selected color
     if (brushStyle.texture === 'eraser') {
       if (previousBrushStyle) {
         onBrushChange({
           ...previousBrushStyle,
           color: color,
-          texture: 'normal', // Switch back to normal texture
+          texture: 'normal',
         });
       } else {
         onBrushChange({
           ...brushStyle,
           color: color,
-          texture: 'normal', // Switch back to normal texture
+          texture: 'normal',
         });
       }
     } else {
-      // Normal color change
       onBrushChange({...brushStyle, color});
     }
   };
@@ -209,21 +198,17 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
   };
 
   const adjustOpacity = (amount: number) => {
-    // Don't adjust opacity for eraser
     if (brushStyle.texture === 'eraser') return;
 
     const newValue = Math.max(0.1, Math.min(1.0, brushStyle.opacity + amount));
     onBrushChange({...brushStyle, opacity: newValue});
   };
 
-  // Quick access eraser toggle button
   const toggleEraser = () => {
     if (brushStyle.texture === 'eraser') {
-      // Switch back to previous brush
       if (previousBrushStyle) {
         onBrushChange(previousBrushStyle);
       } else {
-        // Default to normal brush if no previous style saved
         onBrushChange({
           ...brushStyle,
           texture: 'normal',
@@ -231,7 +216,6 @@ const BrushToolbar: React.FC<BrushToolbarProps> = ({
         });
       }
     } else {
-      // Switch to eraser
       setPreviousBrushStyle({...brushStyle});
       onBrushChange({
         ...brushStyle,
@@ -485,10 +469,10 @@ const styles = StyleSheet.create({
   },
   expandedContent: {
     flex: 1,
-    paddingBottom: 10, // Add padding at the bottom for better spacing
+    paddingBottom: 10,
   },
   section: {
-    marginBottom: 18, // Increased from 12 to 18 for better spacing
+    marginBottom: 18,
   },
   disabledSection: {
     opacity: 0.5,
@@ -524,7 +508,7 @@ const styles = StyleSheet.create({
   },
   textureButton: {
     flex: 1,
-    padding: 10, // Increased from 8 to 10
+    padding: 10,
     borderRadius: 5,
     backgroundColor: '#333',
     marginHorizontal: 5,
@@ -544,10 +528,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   colorButton: {
-    width: 32, // Increased from 30 to 32
-    height: 32, // Increased from 30 to 32
+    width: 32,
+    height: 32,
     borderRadius: 16,
-    margin: 5, // Increased from 4 to 5
+    margin: 5,
     borderWidth: 1,
     borderColor: '#555',
   },
@@ -567,7 +551,7 @@ const styles = StyleSheet.create({
   physicsLabel: {
     color: 'white',
     fontSize: 12,
-    marginBottom: 6, // Increased from 4 to 6
+    marginBottom: 6,
   },
   controlButtons: {
     flexDirection: 'row',
@@ -577,8 +561,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   controlButton: {
-    width: 30, // Increased from 28 to 30
-    height: 30, // Increased from 28 to 30
+    width: 30,
+    height: 30,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -374,14 +374,14 @@ int NativeGestureCanvas::beginStroke(jsi::Runtime& rt, int canvasId, jsi::Object
     }
   }
   
-  brushEngine->configureBrush(
-    brushStyleData["size"].asNumber(),
-    brushStyleData["opacity"].asNumber(),
-    color,
-    brushStyleData["texture"].asString(rt).utf8(rt),
-    brushStyleData["dampening"].asNumber(),
-    brushStyleData["fluidResponse"].asNumber()
-  );
+brushEngine->configureBrush(
+  brushStyleData["size"].asNumber(),
+  brushStyleData["opacity"].asNumber(),
+  color, 
+  brushStyleData["texture"].asString(rt).utf8(rt),
+  brushStyleData["dampening"].asNumber(),
+  brushStyleData["fluidResponse"].asNumber()
+);
   
   int strokeId = nextStrokeId_++;
   auto stroke = std::make_shared<Stroke>(brushEngine);
